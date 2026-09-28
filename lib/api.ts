@@ -3,10 +3,18 @@ let access: string | null = null;
 let refresh: string | null = null;
 let generation = 0;
 let renewal: Promise<void> | null = null;
+const sessionListeners = new Set<() => void>();
+let sessionVersion = 0;
+export function subscribeSession(listener: () => void) {
+  sessionListeners.add(listener);
+  return () => { sessionListeners.delete(listener); };
+}
+export function getSessionVersion() { return sessionVersion; }
+function notifySession() { sessionVersion++; sessionListeners.forEach(listener => listener()); }
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
-export function logout() { generation++; access = null; refresh = null; renewal = null; }
+export function logout() { generation++; access = null; refresh = null; renewal = null; notifySession(); }
 export function hasSession() { return access !== null; }
 export async function login(username: string, password: string) {
   logout();
@@ -20,6 +28,7 @@ export async function login(username: string, password: string) {
   if (typeof data.access !== 'string' || typeof data.refresh !== 'string') throw new ApiError(502, 'Respuesta de autenticación inesperada.');
   if (current !== generation) throw new ApiError(401, 'Inicio de sesión cancelado.');
   access = data.access; refresh = data.refresh;
+  notifySession();
 }
 async function renew() {
   if (!refresh) throw new ApiError(401, 'Tu sesión ha terminado.');

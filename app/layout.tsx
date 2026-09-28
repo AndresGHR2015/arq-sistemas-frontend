@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from "next";
 import "./globals.css";
-import { WorkspaceProvider } from '@/components/nexo/store';
 
 export const metadata: Metadata = {
   title: "Nexo · Tu espacio de proyectos",
@@ -19,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className="antialiased"><WorkspaceProvider><Suspense fallback={<p>Cargando…</p>}>{children}</Suspense></WorkspaceProvider></body>
+      <body className="antialiased"><Suspense fallback={<p>Cargando…</p>}>{children}</Suspense></body>
     </html>
   );
 }

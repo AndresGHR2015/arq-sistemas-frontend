@@ -24,3 +24,33 @@ test('login, bearer, shared refresh, errors and logout',async()=>{
   globalThis.fetch=async()=>reply({},401);await assert.rejects(client.login('bad','bad'),e=>e.status===401);assert.equal(client.hasSession(),false);
  }finally{globalThis.fetch=original;client.logout();}
 });
+
+test('session changes invalidate account state and reject a late file response',async()=>{
+ const original=globalThis.fetch;
+ const notifications=[];
+ const unsubscribe=client.subscribeSession(()=>notifications.push({version:client.getSessionVersion(),authenticated:client.hasSession()}));
+ try {
+  const initial=client.getSessionVersion();
+  globalThis.fetch=async()=>reply({access:'account-a',refresh:'refresh-a'});
+  await client.login('a','test');
+  assert.deepEqual(notifications.map(n=>n.authenticated),[false,true]);
+  assert.ok(notifications[1].version>initial);
+  let finish;
+  globalThis.fetch=()=>new Promise(resolve=>{finish=resolve;});
+  const pending=client.listFiles();
+  client.logout();
+  assert.equal(notifications.at(-1).authenticated,false);
+  globalThis.fetch=async()=>reply({access:'account-b',refresh:'refresh-b'});
+  await client.login('b','test');
+  finish(reply([{id:99,nombre_original:'Solo cuenta A'}]));
+  await assert.rejects(pending,error=>error.status===401);
+  assert.equal(client.hasSession(),true);
+  globalThis.fetch=async()=>reply({},401);
+  await assert.rejects(client.listFiles(),error=>error.status===401);
+  assert.equal(notifications.at(-1).authenticated,false);
+  unsubscribe();
+  const count=notifications.length;
+  client.logout();
+  assert.equal(notifications.length,count);
+ }finally{unsubscribe();globalThis.fetch=original;client.logout();}
+});

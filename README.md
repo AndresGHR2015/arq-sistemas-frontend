@@ -18,17 +18,22 @@ En producción usar `npm run build` y `npm start`, configurar BACKEND_URL antes 
 
 ## Qué está conectado
 
-- `/login`: POST `/api/token/` con `{username,password}`.
-- `/cuenta`: GET `/api/archivos/` con Bearer token; muestra solamente la respuesta real.
+- `/login`: POST `/api/token/` con `{username,password}`; al entrar redirige a `/proyectos`.
+- `/proyectos` y `/grupos`: espacio principal autenticado con el sidebar y formularios originales. `/cuenta` redirige a `/proyectos`.
+- Archivos disponibles dentro de Proyectos: GET `/api/archivos/` con Bearer token; muestra solamente la respuesta real y no condiciona la navegación.
 - Renovación con POST `/api/token/refresh/` tras un 401, una sola renovación compartida entre peticiones concurrentes y un único reintento.
 - Logout local borra tokens y datos visibles.
 - Estados de carga, lista vacía, credenciales inválidas, servidor no disponible y acceso denegado.
 
 Los tokens se guardan solamente en memoria. Recargar requiere iniciar sesión de nuevo. Es una decisión provisional explícita: no se almacenan refresh tokens en localStorage. Cerrar sesión NO revoca tokens emitidos en el servidor; falta acordar persistencia, cookies/CSRF si corresponde, y revocación con el backend. Los guards de React son UX; la seguridad reside en Django.
 
-## Qué sigue siendo demo
+## Capacidades pendientes
 
-`/proyectos`, `/proyectos/[id]`, `/grupos` y `/grupos/[id]` conservan datos ficticios en React Context. La demo es pública deliberadamente, no requiere login y no recibe los archivos reales. Sus tareas, notas, conversaciones, roles, subida local y funciones de compartir no persisten en el backend. No inferir permisos reales del selector de roles.
+El backend local revisado expone autenticación, registro y CRUD de archivos. No expone consulta ni creación de proyectos o equipos (Grupos), perfil de usuario o permisos efectivos. Las pantallas de Proyectos y Grupos indican funcionalidad pendiente, nunca una consulta exitosa con cero resultados. Una lista vacía de archivos no permite deducir si existen proyectos.
+
+Los botones originales abren los formularios de proyecto y grupo. Antes de introducir datos se avisa que el guardado no está disponible; el envío está deshabilitado y no crea entidades en memoria ni localStorage. Se conservan los componentes de tarjetas y detalles para una futura integración. Tareas, notas, conversaciones, integrantes y accesos todavía requieren soporte del backend. El selector de roles y la identidad ficticia no aparecen en la experiencia autenticada.
+
+Los fixtures de `components/nexo/data.ts` se conservan separados del estado real: el store no los carga. Tampoco se registran las herramientas WebMCP de demostración. Al cerrar sesión o expirar la renovación se desmonta el estado de la cuenta, incluidos archivos y formularios; las respuestas tardías no se incorporan a otra sesión.
 
 El listado real de archivos no ofrece descarga directa por `/media/`: esa ruta del backend revisado no aplica autorización. Tampoco se habilita subida real mientras falten validaciones del proyecto de destino. No inventamos endpoints de proyectos o equipos que el servidor aún no expone.
 
@@ -49,9 +54,9 @@ Primera versión de archivos: PDF/imágenes con vista previa cuando exista desca
 ## Estructura
 
 - `app/login/page.tsx`: formulario conectado.
-- `app/cuenta/page.tsx`: primer recorrido real.
+- `app/cuenta/page.tsx`: redirección de compatibilidad al espacio principal.
 - `lib/api.ts`: transporte, JWT y DTO del backend.
-- `components/nexo/`: interfaz original y store de demostración.
+- `components/nexo/`: interfaz original y store de cuenta; fixtures de demostración separados.
 - `app/globals.css`: estilo compartido y login responsive.
 - `docs/FRONTEND_GUIDELINES.md`: guía original de diseño, no contrato del backend.
 - `tests/api.test.mjs`: pruebas de autenticación con transporte simulado.
@@ -64,7 +69,9 @@ npm test
 npm run build
 ```
 
-Validado: TypeScript, build de producción y pruebas del cliente HTTP con respuestas simuladas (login, Bearer, renovación concurrente, 401, 403 y logout). No se ha probado contra un backend Django activo ni con credenciales reales.
+Validado: TypeScript, build de producción y pruebas del cliente HTTP con respuestas simuladas (login, Bearer, renovación concurrente, 401, 403 y logout). El recorrido autenticado no se ha probado con credenciales reales.
+
+Corrección del espacio principal: `pnpm typecheck`, `pnpm test` y `pnpm build`. Se añadió una prueba de notificaciones de sesión y rechazo de respuestas de archivos que llegan después de cambiar de cuenta. Se conserva `skipTrailingSlashRedirect: true` y el destino `/api/:path*/` del proxy. Se comprobó el proxy con Django activo: POST `/api/token/` sin credenciales devolvió 400 de validación y GET `/api/archivos/` sin token devolvió 401, sin redirecciones. No se realizó login con credenciales reales. La validación de escritorio/móvil con Playwright quedó bloqueada por ausencia del ejecutable de Chrome; no se declara comprobado el recorrido completo en navegador.
 
 ## Incorporar a tu repositorio vacío
 
