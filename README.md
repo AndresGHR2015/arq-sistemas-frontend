@@ -1,86 +1,160 @@
 # Frontend
 
-Frontend React + TypeScript con Next.js. Exportación independiente del prototipo de Sites; conserva las pantallas y estilos originales y añade autenticación compatible con Django REST Framework + SimpleJWT.
+Espacio de trabajo colaborativo para reunir proyectos, archivos, ideas y personas. Su objetivo es que cada equipo pueda encontrar la información de su trabajo en un mismo lugar, conservando el contexto de lo que comparte y construye.
 
-## Arranque
+La organización gira en torno a tres conceptos:
 
-Requiere Node.js >=22.13 y npm. Desde esta carpeta:
+- **Proyectos:** espacios para reunir los recursos y el trabajo relacionado con un objetivo.
+- **Grupos:** equipos de personas que colaboran en uno o varios proyectos.
+- **Recursos:** archivos y, como parte de la evolución del producto, notas y enlaces asociados a un proyecto.
 
-```bash
-npm ci
-cp .env.example .env.local
-npm run dev
-```
+Este repositorio contiene la interfaz web de la app. Consume la API de un backend independiente desarrollado con Django REST Framework y utiliza JWT para la autenticación.
 
-Abrir http://localhost:3000/login. `BACKEND_URL` apunta al origen de Django (por defecto http://127.0.0.1:8000), sin `/api`. Reiniciar Next después de cambiarlo. Next reenvía `/api/*` al backend; el navegador utiliza el mismo origen y no necesita CORS para este recorrido. Mantener Django ejecutándose y crear una cuenta allí o mediante su endpoint de registro. No se incluyen cuentas ni contraseñas.
+## Estado actual
 
-En producción usar `npm run build` y `npm start`, configurar BACKEND_URL antes de compilar y HTTPS. Este proyecto necesita servidor Next; no es una exportación HTML estática. El backend debe aceptar el host correspondiente en ALLOWED_HOSTS. No poner secretos en variables NEXT_PUBLIC.
+El frontend está en desarrollo. La navegación y los formularios conservan la experiencia visual del proyecto, mientras la integración se limita a las capacidades disponibles en la API.
 
-## Qué está conectado
+| Funcionalidad | Estado |
+| --- | --- |
+| Inicio de sesión | Conectado con la API mediante nombre de usuario y contraseña. |
+| Renovación de sesión | Automática tras una respuesta 401, con un único reintento. |
+| Cierre de sesión | Elimina los tokens y el estado visible de la cuenta en el frontend. |
+| Consulta de archivos | Muestra los archivos que el servidor permite consultar con la cuenta. |
+| Navegación por Proyectos y Grupos | Disponible después del login, incluso sin archivos. |
+| Listado y creación de proyectos y grupos | Pendientes de soporte en la API. Los formularios se pueden explorar, pero no guardar. |
+| Subida y descarga privada de archivos | Pendientes de integración con las validaciones y autorización necesarias. |
+| Notas, tareas, conversaciones y gestión de integrantes | Contempladas en el diseño; sin persistencia integrada. |
 
-- `/login`: POST `/api/token/` con `{username,password}`; al entrar redirige a `/proyectos`.
-- `/proyectos` y `/grupos`: espacio principal autenticado con el sidebar y formularios originales. `/cuenta` redirige a `/proyectos`.
-- Archivos disponibles dentro de Proyectos: GET `/api/archivos/` con Bearer token; muestra solamente la respuesta real y no condiciona la navegación.
-- Renovación con POST `/api/token/refresh/` tras un 401, una sola renovación compartida entre peticiones concurrentes y un único reintento.
-- Logout local borra tokens y datos visibles.
-- Estados de carga, lista vacía, credenciales inválidas, servidor no disponible y acceso denegado.
+Una funcionalidad pendiente se muestra como tal, no como una consulta exitosa sin resultados. Los proyectos y grupos no se deducen del listado de archivos. Los datos de demostración permanecen separados del estado de la cuenta y no se cargan en la experiencia autenticada.
 
-Los tokens se guardan solamente en memoria. Recargar requiere iniciar sesión de nuevo. Es una decisión provisional explícita: no se almacenan refresh tokens en localStorage. Cerrar sesión NO revoca tokens emitidos en el servidor; falta acordar persistencia, cookies/CSRF si corresponde, y revocación con el backend. Los guards de React son UX; la seguridad reside en Django.
+## Tecnologías
 
-## Capacidades pendientes
+- **Next.js 16** con App Router.
+- **React 19** y **TypeScript**.
+- **Tailwind CSS 4** y estilos propios.
+- Componentes de interfaz reutilizables en `components/ui/` e iconos de **Lucide**.
+- **pnpm** para la gestión de dependencias y ejecución de scripts.
+- Pruebas del cliente HTTP con el ejecutor integrado de **Node.js**.
 
-El backend local revisado expone autenticación, registro y CRUD de archivos. No expone consulta ni creación de proyectos o equipos (Grupos), perfil de usuario o permisos efectivos. Las pantallas de Proyectos y Grupos indican funcionalidad pendiente, nunca una consulta exitosa con cero resultados. Una lista vacía de archivos no permite deducir si existen proyectos.
+## Desarrollo local
 
-Los botones originales abren los formularios de proyecto y grupo. Antes de introducir datos se avisa que el guardado no está disponible; el envío está deshabilitado y no crea entidades en memoria ni localStorage. Se conservan los componentes de tarjetas y detalles para una futura integración. Tareas, notas, conversaciones, integrantes y accesos todavía requieren soporte del backend. El selector de roles y la identidad ficticia no aparecen en la experiencia autenticada.
+### Requisitos
 
-Los fixtures de `components/nexo/data.ts` se conservan separados del estado real: el store no los carga. Tampoco se registran las herramientas WebMCP de demostración. Al cerrar sesión o expirar la renovación se desmonta el estado de la cuenta, incluidos archivos y formularios; las respuestas tardías no se incorporan a otra sesión.
+- Node.js **22.13 o superior**.
+- pnpm disponible en el entorno.
+- Backend en ejecución y una cuenta válida para probar el recorrido autenticado.
 
-El listado real de archivos no ofrece descarga directa por `/media/`: esa ruta del backend revisado no aplica autorización. Tampoco se habilita subida real mientras falten validaciones del proyecto de destino. No inventamos endpoints de proyectos o equipos que el servidor aún no expone.
+Ejecuta los comandos desde la carpeta `arq-sistemas-frontend`.
 
-## Compatibilidad y siguiente integración
-
-Revisado contra https://github.com/Frobama/proyecto-django, commit `5536667649109688581c1966b16e4ee7c26e2ea5` (2026-09-26).
-
-- `Usuario` corresponde a la identidad de Django; login actual es por username.
-- `Equipo` corresponde a Grupo en la interfaz.
-- `Proyecto` tiene múltiples equipos; no asumir un único propietario a partir del primer equipo.
-- `Archivo` se modela exactamente como `ArchivoDTO` en `lib/api.ts`.
-- `global` no se interpreta como público; pendiente definición del backend.
-
-Próximo trabajo: validar creación y cambios de proyecto en archivos, aplicar roles, descargar con autorización y añadir endpoints de proyectos/equipos/me. Después reemplazar el store de demo con servicios REST y adaptar sus tipos. Las pantallas deberán reflejar datos ausentes sin inventar autores, estados o permisos.
-
-Primera versión de archivos: PDF/imágenes con vista previa cuando exista descarga autorizada; otros formatos admitidos, almacenamiento y descarga. Sin edición avanzada ni historial real por ahora.
-
-## Estructura
-
-- `app/login/page.tsx`: formulario conectado.
-- `app/cuenta/page.tsx`: redirección de compatibilidad al espacio principal.
-- `lib/api.ts`: transporte, JWT y DTO del backend.
-- `components/nexo/`: interfaz original y store de cuenta; fixtures de demostración separados.
-- `app/globals.css`: estilo compartido y login responsive.
-- `docs/FRONTEND_GUIDELINES.md`: guía original de diseño, no contrato del backend.
-- `tests/api.test.mjs`: pruebas de autenticación con transporte simulado.
-
-## Verificación
+### Instalar dependencias
 
 ```bash
-npm run typecheck
-npm test
-npm run build
+pnpm install --frozen-lockfile
 ```
 
-Validado: TypeScript, build de producción y pruebas del cliente HTTP con respuestas simuladas (login, Bearer, renovación concurrente, 401, 403 y logout). El recorrido autenticado no se ha probado con credenciales reales.
+### Configurar la conexión con el backend
 
-Corrección del espacio principal: `pnpm typecheck`, `pnpm test` y `pnpm build`. Se añadió una prueba de notificaciones de sesión y rechazo de respuestas de archivos que llegan después de cambiar de cuenta. Se conserva `skipTrailingSlashRedirect: true` y el destino `/api/:path*/` del proxy. Se comprobó el proxy con Django activo: POST `/api/token/` sin credenciales devolvió 400 de validación y GET `/api/archivos/` sin token devolvió 401, sin redirecciones. No se realizó login con credenciales reales. La validación de escritorio/móvil con Playwright quedó bloqueada por ausencia del ejecutable de Chrome; no se declara comprobado el recorrido completo en navegador.
+Por defecto, el frontend utiliza `http://127.0.0.1:8000` como origen del backend. Si necesitas otro origen, define `BACKEND_URL` en `.env.local`:
 
-## Incorporar a tu repositorio vacío
+```dotenv
+BACKEND_URL=http://127.0.0.1:8000
+```
 
-Clona TU repositorio, copia dentro el contenido de esta carpeta (incluidos `.gitignore` y `.env.example`) y ejecuta:
+El valor debe contener el origen del servidor, sin el sufijo `/api`. Reinicia Next.js después de cambiarlo. Esta variable se utiliza en el servidor y no necesita el prefijo `NEXT_PUBLIC_`.
+
+### Iniciar la aplicación
 
 ```bash
-git add .
-git commit -m "feat: frontend Nexo con login JWT y referencia visual"
-git push
+pnpm dev
 ```
 
-No copiar node_modules, .next ni .env.local. El ZIP no contiene historial Git, credenciales ni configuración de hosting Sites. Se usa Next.js estándar en lugar del runtime Vinext/Sites para conservar las rutas y componentes React existentes sin depender del hosting original.
+Abre [http://localhost:3000/login](http://localhost:3000/login). Después de iniciar sesión, la aplicación te lleva a **Proyectos**; desde el sidebar puedes acceder a **Grupos** y cerrar sesión.
+
+La interfaz actual no incluye registro de usuarios. Para entrar necesitas una cuenta existente en el backend.
+
+## Navegación
+
+| Ruta | Propósito |
+| --- | --- |
+| `/` | Redirige al inicio de sesión. |
+| `/login` | Formulario de acceso. |
+| `/proyectos` | Espacio principal y consulta de archivos disponibles. |
+| `/grupos` | Sección de grupos y acceso al formulario de creación. |
+| `/proyectos/[id]` | Ruta de detalle preparada para la futura integración de proyectos. |
+| `/grupos/[id]` | Ruta de detalle preparada para la futura integración de grupos. |
+| `/cuenta` | Redirección de compatibilidad a `/proyectos`. |
+
+Mientras la API no permita consultar proyectos y grupos, sus listados y detalles informan que la función está pendiente. Los formularios de creación explican esta limitación antes de introducir datos y mantienen el envío deshabilitado.
+
+## Integración con la API
+
+El navegador realiza las peticiones al mismo origen del frontend. Next.js las reenvía al backend mediante las reglas de `next.config.ts`.
+
+| Método | Endpoint utilizado | Operación |
+| --- | --- | --- |
+| `POST` | `/api/token/` | Obtener los tokens con `{ username, password }`. |
+| `POST` | `/api/token/refresh/` | Renovar el token de acceso. |
+| `GET` | `/api/archivos/` | Consultar archivos con autenticación Bearer. |
+
+Las **barras finales** forman parte de las rutas utilizadas por Django. El proxy conserva el destino `/api/:path*/` y utiliza `skipTrailingSlashRedirect: true` para evitar que Next.js las elimine antes de reenviar la petición.
+
+En el contrato actual, `Equipo` corresponde a **Grupo** en la interfaz. La existencia de modelos de proyectos y equipos en el backend no implica que estén disponibles mediante endpoints. Tampoco se infieren roles, integrantes o identidad a partir de los archivos recibidos.
+
+### Sesiones y estados de la interfaz
+
+- Los tokens de acceso y renovación se mantienen **solo en memoria**. Recargar la página requiere iniciar sesión de nuevo.
+- Las peticiones concurrentes que necesitan renovar el acceso comparten la misma renovación.
+- Al cerrar sesión o fallar la renovación por sesión inválida, se descarta el estado de la cuenta. Las respuestas tardías de una sesión anterior no se incorporan a otra.
+- El cierre de sesión es local; no revoca los tokens ya emitidos en el servidor.
+- La consulta de archivos distingue carga, lista vacía, fallo de conexión, acceso denegado y otros errores, con opción de reintentar.
+
+La autorización de los datos corresponde al backend. La navegación protegida del frontend facilita el recorrido del usuario, pero no sustituye los permisos del servidor.
+
+## Estructura del proyecto
+
+```text
+app/                  Rutas, layout y estilos globales
+components/
+  nexo/               Espacio de trabajo, formularios, estado y componentes del dominio
+  ui/                 Componentes visuales reutilizables
+hooks/                Hooks compartidos
+lib/
+  api.ts              Cliente HTTP, autenticación y tipos de la API
+  utils.ts            Utilidades comunes
+public/               Recursos estáticos
+tests/                Pruebas del cliente API
+docs/                 Documentación de diseño
+next.config.ts        Configuración de Next.js y proxy hacia Django
+```
+
+La guía de producto e interfaz está en [`docs/FRONTEND_GUIDELINES.md`](docs/FRONTEND_GUIDELINES.md). Describe la experiencia prevista; las capacidades implementadas deben contrastarse con la API actual.
+
+## Comandos de comprobación
+
+```bash
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+Las pruebas automatizadas actuales cubren el cliente HTTP con respuestas simuladas: autenticación, envío del token, renovación compartida, errores de autorización, cierre de sesión y rechazo de respuestas de cuentas anteriores. No sustituyen las pruebas del recorrido completo en navegador con el backend.
+
+Para ejecutar localmente la compilación de producción:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Configura `BACKEND_URL` antes de compilar. La aplicación requiere un servidor Next.js para atender las rutas y el proxy; no utiliza una exportación HTML estática.
+
+## Evolución prevista
+
+Los siguientes pasos de integración dependen del contrato que exponga el backend:
+
+1. Consultar y crear proyectos y grupos con datos confirmados por el servidor.
+2. Incorporar la identidad de la cuenta y los permisos efectivos por acción.
+3. Habilitar subida, descarga y vista previa de archivos con autorización.
+4. Conectar integrantes, accesos y los recursos colaborativos previstos en el diseño.
+
+El desarrollo debe mantener la separación entre datos reales y ejemplos de demostración, reutilizar los componentes existentes y comunicar claramente las funcionalidades todavía no disponibles.
