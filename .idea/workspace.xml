@@ -5,10 +5,17 @@
   </component>
   <component name="BackendCodeEditorMiscSettings">
     <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="43" type="long" />
+    <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f3514504-c0d8-41a5-8f5d-7f028b8701a4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/nexo/dialogs.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/nexo/dialogs.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/nexo/store.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/nexo/store.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/nexo/webmcp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/nexo/webmcp.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/nexo/workspace.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/nexo/workspace.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/api.test.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/api.test.mjs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,23 +23,23 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="5" />
+    <option name="cachedIndexableFilesCount" value="103" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "AndresGHR2015"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;AndresGHR2015&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/AndresGHR2015/arq-sistemas-frontend.git",
-    "accountId": "133b62f2-126f-4506-b9ac-1747aba54dbb"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/AndresGHR2015/arq-sistemas-frontend.git&quot;,
+    &quot;accountId&quot;: &quot;133b62f2-126f-4506-b9ac-1747aba54dbb&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -41,21 +48,21 @@
     <decayedCancelled>
       <entry key="MS100" value="1.0" />
       <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0" />
-      <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.0" />
-      <entry key="M10" value="1.0" />
-      <entry key="M15" value="1.0" />
-      <entry key="M30" value="1.0" />
-      <entry key="H1" value="1.0" />
-      <entry key="H2" value="1.0" />
-      <entry key="H4" value="1.0" />
-      <entry key="D1" value="1.0" />
-      <entry key="W1" value="1.0" />
+      <entry key="S2" value="1.0000084256426638" />
+      <entry key="S5" value="1.021161307735644" />
+      <entry key="S10" value="1.3309010944843898" />
+      <entry key="S30" value="3.2409224142923696" />
+      <entry key="S60" value="4.6578228424191925" />
+      <entry key="M2" value="5.681869241627132" />
+      <entry key="M5" value="6.432430189901886" />
+      <entry key="M10" value="6.709025486914369" />
+      <entry key="M15" value="6.804382476750565" />
+      <entry key="M30" value="6.901364572421478" />
+      <entry key="H1" value="6.950473836213254" />
+      <entry key="H2" value="6.97518458095629" />
+      <entry key="H4" value="6.987579178001452" />
+      <entry key="D1" value="6.997928039425305" />
+      <entry key="W1" value="6.999703960941909" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -77,29 +84,29 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.23981602983131609" />
-      <entry key="MS500" value="0.7515807390327813" />
-      <entry key="S2" value="0.931094819830229" />
-      <entry key="S5" value="0.9718462521444694" />
-      <entry key="S10" value="0.9858226271213648" />
-      <entry key="S30" value="0.9952516983576207" />
-      <entry key="S60" value="0.9976230241717664" />
-      <entry key="M2" value="0.9988108049935014" />
-      <entry key="M5" value="0.9995241521875142" />
-      <entry key="M10" value="0.9997620477831284" />
-      <entry key="M15" value="0.999841358896836" />
-      <entry key="M30" value="0.9999206763022935" />
-      <entry key="H1" value="0.9999603373645845" />
-      <entry key="H2" value="0.9999801684856477" />
-      <entry key="H4" value="0.9999900841936623" />
-      <entry key="D1" value="0.9999983473587823" />
-      <entry key="W1" value="0.9999997639082303" />
+      <entry key="MS100" value="0.9138314502294005" />
+      <entry key="MS500" value="0.9821395952633915" />
+      <entry key="S2" value="0.9955130693400289" />
+      <entry key="S5" value="1.0192985220715918" />
+      <entry key="S10" value="1.329282024172916" />
+      <entry key="S30" value="3.2385168024843334" />
+      <entry key="S60" value="4.655846243143112" />
+      <entry key="M2" value="5.680590098701113" />
+      <entry key="M5" value="6.431831465209162" />
+      <entry key="M10" value="6.708709915987249" />
+      <entry key="M15" value="6.804168358009374" />
+      <entry key="M30" value="6.901255608858997" />
+      <entry key="H1" value="6.950418871693569" />
+      <entry key="H2" value="6.975156977166349" />
+      <entry key="H4" value="6.9875653456176945" />
+      <entry key="D1" value="6.997925729784411" />
+      <entry key="W1" value="6.999703630889169" />
     </decayedShown>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3JsvNLlzB1hJtOOK3IDYoKcTN9E" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -119,8 +126,11 @@
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "main",
+    "js.debugger.nextJs.config.created.client": "true",
+    "js.debugger.nextJs.config.created.server": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/andresghr/Dev/repos/monolito-sistemas/arq-sistemas-frontend",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -130,6 +140,21 @@
     "ts.external.directory.path": "/Users/andresghr/Dev/repos/arq-sistemas-frontend/node_modules/typescript/lib"
   }
 }]]></component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

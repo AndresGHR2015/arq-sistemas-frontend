@@ -21,9 +21,12 @@ El frontend está en desarrollo. La navegación y los formularios conservan la e
 | Cierre de sesión | Elimina los tokens y el estado visible de la cuenta en el frontend. |
 | Consulta de archivos | Muestra los archivos que el servidor permite consultar con la cuenta. |
 | Navegación por Proyectos y Grupos | Disponible después del login, incluso sin archivos. |
-| Listado y creación de proyectos y grupos | Pendientes de soporte en la API. Los formularios se pueden explorar, pero no guardar. |
-| Subida y descarga privada de archivos | Pendientes de integración con las validaciones y autorización necesarias. |
-| Notas, tareas, conversaciones y gestión de integrantes | Contempladas en el diseño; sin persistencia integrada. |
+| Proyectos y grupos | Listado, detalle, creación, edición y eliminación conectados. |
+| Cuenta y permisos | Identidad real y capacidades por acción recibidas del servidor. |
+| Archivos por proyecto | Subida múltiple, edición de metadatos, reemplazo, eliminación y descarga autenticada. |
+| Vista previa | Imágenes PNG/JPEG/GIF/WebP y PDF mediante descarga autenticada; otros formatos se descargan como originales. |
+| Integrantes y accesos | Consulta, incorporación y retirada de miembros; asociación y retirada de grupos de un proyecto. |
+| Notas, tareas, conversaciones, comentarios y versiones | Contemplados en el diseño; todavía sin persistencia integrada. |
 
 Una funcionalidad pendiente se muestra como tal, no como una consulta exitosa sin resultados. Los proyectos y grupos no se deducen del listado de archivos. Los datos de demostración permanecen separados del estado de la cuenta y no se cargan en la experiencia autenticada.
 
@@ -43,6 +46,8 @@ Una funcionalidad pendiente se muestra como tal, no como una consulta exitosa si
 - Node.js **22.13 o superior**.
 - pnpm disponible en el entorno.
 - Backend en ejecución y una cuenta válida para probar el recorrido autenticado.
+
+El backend debe incluir tanto los endpoints de proyectos/equipos del commit `5542513` como las ampliaciones de esta integración: `/api/me/`, capacidades `permissions`, asociaciones `equipos` en proyectos y descarga autenticada. Comprueba que el proceso de Django está ejecutando esa copia del código: actualizar un checkout distinto del que monta Docker no actualiza el servidor activo.
 
 Ejecuta los comandos desde la carpeta `arq-sistemas-frontend`.
 
@@ -80,11 +85,11 @@ La interfaz actual no incluye registro de usuarios. Para entrar necesitas una cu
 | `/login` | Formulario de acceso. |
 | `/proyectos` | Espacio principal y consulta de archivos disponibles. |
 | `/grupos` | Sección de grupos y acceso al formulario de creación. |
-| `/proyectos/[id]` | Ruta de detalle preparada para la futura integración de proyectos. |
-| `/grupos/[id]` | Ruta de detalle preparada para la futura integración de grupos. |
+| `/proyectos/[id]` | Recursos del proyecto, equipos asociados y gestión de accesos. |
+| `/grupos/[id]` | Proyectos asociados e integrantes del grupo. |
 | `/cuenta` | Redirección de compatibilidad a `/proyectos`. |
 
-Mientras la API no permita consultar proyectos y grupos, sus listados y detalles informan que la función está pendiente. Los formularios de creación explican esta limitación antes de introducir datos y mantienen el envío deshabilitado.
+Los formularios conservan los datos si falla el guardado y solo confirman resultados aceptados por el servidor. Crear un proyecto con un grupo seleccionado es una operación atómica: se crea su equipo principal y se asocia el grupo elegido en la misma transacción. En subidas múltiples, los archivos ya confirmados no vuelven a enviarse al reintentar los pendientes.
 
 ## Integración con la API
 
@@ -94,11 +99,32 @@ El navegador realiza las peticiones al mismo origen del frontend. Next.js las re
 | --- | --- | --- |
 | `POST` | `/api/token/` | Obtener los tokens con `{ username, password }`. |
 | `POST` | `/api/token/refresh/` | Renovar el token de acceso. |
-| `GET` | `/api/archivos/` | Consultar archivos con autenticación Bearer. |
+| `GET` | `/api/me/` | Identidad y capacidades de creación. |
+| `GET`, `POST` | `/api/proyectos/` | Consultar y crear proyectos. |
+| `GET`, `PATCH`, `DELETE` | `/api/proyectos/{id}/` | Consultar, editar y eliminar un proyecto. |
+| `GET`, `POST` | `/api/equipos/` | Consultar y crear grupos. |
+| `GET`, `PATCH`, `DELETE` | `/api/equipos/{id}/` | Consultar, editar y eliminar un grupo. |
+| `GET`, `POST` | `/api/proyectos/{id}/equipos/` | Consultar y asociar grupos. |
+| `DELETE` | `/api/proyectos/{id}/equipos/{equipo_id}/` | Retirar la asociación de un grupo. |
+| `GET` | `/api/equipos/{id}/proyectos/` | Consultar proyectos del grupo. |
+| `GET`, `POST` | `/api/equipos/{id}/miembros/` | Consultar y añadir integrantes. |
+| `DELETE` | `/api/equipos/{id}/miembros/{usuario_id}/` | Retirar un integrante. |
+| `GET`, `POST` | `/api/archivos/` | Consultar archivos y subir mediante multipart. |
+| `PATCH`, `DELETE` | `/api/archivos/{id}/` | Cambiar metadatos/contenido y eliminar archivos. |
+| `GET` | `/api/archivos/{id}/download/` | Descargar el contenido con autenticación Bearer. |
 
 Las **barras finales** forman parte de las rutas utilizadas por Django. El proxy conserva el destino `/api/:path*/` y utiliza `skipTrailingSlashRedirect: true` para evitar que Next.js las elimine antes de reenviar la petición.
 
-En el contrato actual, `Equipo` corresponde a **Grupo** en la interfaz. La existencia de modelos de proyectos y equipos en el backend no implica que estén disponibles mediante endpoints. Tampoco se infieren roles, integrantes o identidad a partir de los archivos recibidos.
+En el contrato actual, `Equipo` corresponde a **Grupo** en la interfaz. Un proyecto puede tener varios equipos asociados; no se trata al primero como propietario. El acceso se determina por pertenencia a equipos, no por una jerarquía de roles. La interfaz utiliza las capacidades del servidor, sin convertir `owner` u otro texto de rol en un permiso implícito.
+
+La incorporación de integrantes utiliza el **ID de una cuenta existente**, con un rol descriptivo opcional. No hay búsqueda de usuarios por correo ni envío de invitaciones, y no se modifica el rol de un miembro existente mediante una eliminación/recreación simulada.
+
+La visibilidad de archivos se interpreta así:
+
+- `global=true`: todos los equipos asociados al proyecto pueden acceder.
+- `global=false`: solo usuarios que compartan un equipo del proyecto con quien subió el archivo.
+
+Ninguna opción hace público un archivo. Django ya no sirve `/media/` directamente: la descarga utiliza los permisos del objeto y devuelve los bytes originales. Si existe otro servidor de archivos delante de Django, debe respetar esta misma restricción. Cambiar metadatos o reemplazar contenido no crea historial de versiones.
 
 ### Sesiones y estados de la interfaz
 
@@ -137,7 +163,7 @@ pnpm test
 pnpm build
 ```
 
-Las pruebas automatizadas actuales cubren el cliente HTTP con respuestas simuladas: autenticación, envío del token, renovación compartida, errores de autorización, cierre de sesión y rechazo de respuestas de cuentas anteriores. No sustituyen las pruebas del recorrido completo en navegador con el backend.
+Las pruebas automatizadas del cliente HTTP cubren autenticación, renovación compartida, cierre de sesión, contratos de proyectos/grupos, validaciones, subidas multipart, descarga binaria y rechazo de respuestas de cuentas anteriores. El backend incluye pruebas de permisos, creación atómica y descargas autenticadas. Estas pruebas no sustituyen la revisión de escritorio/móvil ni las comprobaciones con PostgreSQL del entorno final.
 
 Para ejecutar localmente la compilación de producción:
 
@@ -150,11 +176,13 @@ Configura `BACKEND_URL` antes de compilar. La aplicación requiere un servidor N
 
 ## Evolución prevista
 
-Los siguientes pasos de integración dependen del contrato que exponga el backend:
+Quedan pendientes las capacidades que el backend todavía no expone:
 
-1. Consultar y crear proyectos y grupos con datos confirmados por el servidor.
-2. Incorporar la identidad de la cuenta y los permisos efectivos por acción.
-3. Habilitar subida, descarga y vista previa de archivos con autorización.
-4. Conectar integrantes, accesos y los recursos colaborativos previstos en el diseño.
+1. Notas, enlaces, tareas, conversaciones y comentarios persistentes.
+2. Actividad, historial de versiones y proyectos fijados por usuario.
+3. Búsqueda de usuarios e invitaciones por correo.
+4. Edición de roles y una política de permisos diferenciada, si el producto la requiere.
+
+La búsqueda actual filtra los proyectos y archivos cargados para la cuenta. La sesión sigue siendo solo en memoria y no se ha añadido registro público desde la interfaz.
 
 El desarrollo debe mantener la separación entre datos reales y ejemplos de demostración, reutilizar los componentes existentes y comunicar claramente las funcionalidades todavía no disponibles.
